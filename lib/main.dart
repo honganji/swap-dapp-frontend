@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:payment_dapp/model/contract_model.dart';
 import 'package:payment_dapp/view/screens/signin.dart';
 import 'package:payment_dapp/view/widgets/navbar.dart';
-import 'package:payment_dapp/view_model/users_view_model.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future main() async {
+  await dotenv.load(fileName: ".env");
   runApp(
-    MultiProvider(providers: [
-      ChangeNotifierProvider<BottomNavigationBarProvider>(
-        create: (BuildContext context) => BottomNavigationBarProvider(),
-      ),
-      ChangeNotifierProvider(
-        create: (_) => UsersViewModel(),
-      ),
-    ], child: const MyApp()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<BottomNavigationBarProvider>(
+          create: (BuildContext context) => BottomNavigationBarProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ContractModel(),
+        ),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 
@@ -51,10 +56,10 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: HexColor('#C1E3F5'),
       ),
       routes: {
-        '/signIn': (context) => const SignIn(),
+        '/signIn': (context) => SignIn(),
         '/home': (context) => const BottomNavigationBarWidget(),
       },
-      initialRoute: UsersViewModel().isSignedIn ? '/home' : '/signIn',
+      initialRoute: '/signIn',
     );
   }
 }

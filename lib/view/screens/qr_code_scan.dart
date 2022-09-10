@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -62,6 +61,8 @@ class _QRCodeScanState extends State<QRCodeScan> {
 
   @override
   Widget build(BuildContext context) {
+    final displayHeight = MediaQuery.of(context).size.height;
+    final displayWidth = MediaQuery.of(context).size.width;
     return SafeArea(
       child: Scaffold(
         body: Stack(
@@ -74,15 +75,26 @@ class _QRCodeScanState extends State<QRCodeScan> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    height: 30,
+                    height: displayHeight * 0.035,
                     decoration: BoxDecoration(
                         color: Colors.white24,
                         borderRadius: BorderRadius.circular(5)),
                     child: Center(
-                      child: Text(
-                        barcode != null
-                            ? "Recipient Address : ${barcode!.code}"
-                            : "Scan a QR code!",
+                      child: Row(
+                        children: [
+                          Text(
+                            barcode != null
+                                ? "Recipient Address : "
+                                : "Scan a QR code!",
+                          ),
+                          SizedBox(
+                            width: displayWidth * 0.1,
+                            child: Text(
+                              barcode != null ? "${barcode!.code}" : "",
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

@@ -53,7 +53,7 @@ Widget Coins(double displayWidth, displayHeight, String imagePath, symbol, name,
           child: SizedBox(),
         ),
         SizedBox(
-          width: displayWidth * 0.15,
+          width: displayWidth * 0.18,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +66,7 @@ Widget Coins(double displayWidth, displayHeight, String imagePath, symbol, name,
                 ),
               ),
               Text(
-                '\$ ${value}',
+                '${value} ETH',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,

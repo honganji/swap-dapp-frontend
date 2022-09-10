@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:payment_dapp/view/modals/qr_code.dart';
+import 'package:payment_dapp/model/contract_model.dart';
+import 'package:payment_dapp/view/widgets/qr_code.dart';
 import 'package:payment_dapp/view/widgets/coins.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class Home extends StatelessWidget {
@@ -14,6 +17,8 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayHeight = MediaQuery.of(context).size.height;
     final displayWidth = MediaQuery.of(context).size.width;
+    var contractModel = Provider.of<ContractModel>(context, listen: true);
+
     return Scaffold(
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: displayWidth * 0.08),
@@ -76,13 +81,24 @@ class Home extends StatelessWidget {
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 13),
                                 ),
-                                const Text(
-                                  '\$2343.34',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold),
-                                ),
+                                FutureBuilder(
+                                    future: contractModel.getTotalBalance(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Text(
+                                          "${(snapshot.data.toString())} ETH",
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold),
+                                        );
+                                      } else {
+                                        return Center(
+                                          child: CircularProgressIndicator
+                                              .adaptive(),
+                                        );
+                                      }
+                                    })
                               ],
                             ),
                             const Spacer(),
@@ -108,12 +124,17 @@ class Home extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  "0x392vg098f90",
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
+                                SizedBox(
+                                  width: displayWidth * 0.2,
+                                  child: Text(
+                                    contractModel.account,
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
                                   ),
                                 ),
                                 GestureDetector(
@@ -122,7 +143,7 @@ class Home extends StatelessWidget {
                                       context: context,
                                       builder: (_) => QRCode(
                                           qrImage: QrImage(
-                                        data: "0x392vg098f90",
+                                        data: contractModel.account,
                                         size: 200,
                                       )),
                                     );
@@ -171,69 +192,31 @@ class Home extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: ListView(
-                      padding:
-                          EdgeInsets.symmetric(vertical: displayWidth * 0.03),
-                      children: [
-                        Coins(
-                            displayWidth,
-                            displayHeight,
-                            'assets/aurora-aoa-logo.png',
-                            'AOA',
-                            'Aurora',
-                            '2.1',
-                            '25.1'),
-                        Coins(
-                            displayWidth,
-                            displayHeight,
-                            'assets/shib-logo.png',
-                            'SHIB',
-                            'Shiba Inu',
-                            '1.3',
-                            '24.3'),
-                        Coins(
-                            displayWidth,
-                            displayHeight,
-                            'assets/ethereum-eth-logo.png',
-                            'ETH',
-                            'Ethereum',
-                            '0.4',
-                            '13.0'),
-                        Coins(
-                            displayWidth,
-                            displayHeight,
-                            'assets/solana-sol-logo.png',
-                            'SOL',
-                            'Solana',
-                            '4.2',
-                            '43.2'),
-                        Coins(
-                            displayWidth,
-                            displayHeight,
-                            'assets/tether-usdt-logo.png',
-                            'USDT',
-                            'Tether',
-                            '2.6',
-                            '54.2'),
-                        Coins(
-                            displayWidth,
-                            displayHeight,
-                            'assets/uniswap-uni-logo.png',
-                            'UNI',
-                            'Uniswap',
-                            '0',
-                            '0'),
-                        Coins(
-                            displayWidth,
-                            displayHeight,
-                            'assets/polygon-matic-logo.png',
-                            'Matic',
-                            'Polygon',
-                            '0',
-                            '0'),
-                      ],
+                    child: FutureBuilder(
+                      future: contractModel.getTokensInfo(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          var coinsList = contractModel.tokenList;
+                          return ListView.builder(
+                              itemCount: coinsList.length,
+                              itemBuilder: (context, index) {
+                                return Coins(
+                                  displayWidth,
+                                  displayHeight,
+                                  coinsList[index].imagePath,
+                                  coinsList[index].symbol,
+                                  coinsList[index].name,
+                                  coinsList[index].balance,
+                                  (coinsList[index].ethBalance),
+                                );
+                              });
+                        } else {
+                          return Center(
+                              child: CircularProgressIndicator.adaptive());
+                        }
+                      },
                     ),
-                  ),
+                  )
                 ],
               ),
             ),

@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:payment_dapp/view/screens/qr_code_scan.dart';
-import 'package:payment_dapp/view_model/send_model.dart';
+import 'package:provider/provider.dart';
+
+import '../../model/contract_model.dart';
 
 class Send extends StatefulWidget {
   const Send({Key? key}) : super(key: key);
@@ -18,14 +21,9 @@ class Send extends StatefulWidget {
 }
 
 class _SendState extends State<Send> {
-  SendModel dropdownValueOfSecond = SendModel(
-      symbol: "ETH",
-      name: "Ethereum",
-      imagePath: "assets/ethereum-eth-logo.png");
-  SendModel dropdownValueOfThird = SendModel(
-      symbol: "ETH",
-      name: "Ethereum",
-      imagePath: "assets/ethereum-eth-logo.png");
+  Token dropdownValueOfSecond = ContractModel().tokenList[2];
+  Token dropdownValueOfThird = ContractModel().tokenList[2];
+  List<Token> tokenList = ContractModel().tokenList;
   TextEditingController addressController = TextEditingController();
   final amountController = TextEditingController();
 
@@ -33,6 +31,7 @@ class _SendState extends State<Send> {
   Widget build(BuildContext context) {
     final displayHeight = MediaQuery.of(context).size.height;
     final displayWidth = MediaQuery.of(context).size.width;
+    var contractModel = Provider.of<ContractModel>(context, listen: true);
 
     return Scaffold(
       body: Container(
@@ -162,23 +161,9 @@ class _SendState extends State<Send> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text(
-                                "②Input transfer amount",
+                                "②Select coin you want to transfer \n and input amount",
                                 style: GoogleFonts.roboto(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 17,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              SizedBox(width: 10),
-                              Text(
-                                "※ select your preferred currency\n and amount to send to the recipient!",
-                                style: GoogleFonts.roboto(
-                                  fontWeight: FontWeight.w500,
                                   fontSize: 17,
                                   color: Colors.black,
                                 ),
@@ -283,49 +268,15 @@ class _SendState extends State<Send> {
                                       size: 30,
                                       color: HexColor("#628A8A"),
                                     ),
-                                    onChanged: (SendModel? newValue) {
+                                    onChanged: (Token? newValue) {
                                       setState(() {
                                         dropdownValueOfSecond = newValue!;
                                       });
                                     },
-                                    items: <SendModel>[
-                                      SendModel(
-                                          symbol: "AOA",
-                                          name: "Aurora",
-                                          imagePath:
-                                              "assets/aurora-aoa-logo.png"),
-                                      SendModel(
-                                          symbol: "SHIB",
-                                          name: "Shiba Inu",
-                                          imagePath: "assets/shib-logo.png"),
-                                      SendModel(
-                                          symbol: "ETH",
-                                          name: "Ethereum",
-                                          imagePath:
-                                              "assets/ethereum-eth-logo.png"),
-                                      SendModel(
-                                          symbol: "SOL",
-                                          name: "Solana",
-                                          imagePath:
-                                              "assets/solana-sol-logo.png"),
-                                      SendModel(
-                                          symbol: "USDT",
-                                          name: "Tether",
-                                          imagePath:
-                                              "assets/tether-usdt-logo.png"),
-                                      SendModel(
-                                          symbol: "UNI",
-                                          name: "Uniswap",
-                                          imagePath:
-                                              "assets/uniswap-uni-logo.png"),
-                                      SendModel(
-                                          symbol: "Matic",
-                                          name: "Polygon",
-                                          imagePath:
-                                              "assets/polygon-matic-logo.png"),
-                                    ].map<DropdownMenuItem<SendModel>>(
-                                        (SendModel value) {
-                                      return DropdownMenuItem<SendModel>(
+                                    items: tokenList
+                                        .map<DropdownMenuItem<Token>>(
+                                            (Token value) {
+                                      return DropdownMenuItem<Token>(
                                         value: value,
                                         child: Row(
                                           children: [
@@ -422,7 +373,7 @@ class _SendState extends State<Send> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               Text(
-                                "③Select kind of coin you want to send",
+                                "③Select coin recipient want",
                                 style: GoogleFonts.roboto(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 17,
@@ -526,45 +477,14 @@ class _SendState extends State<Send> {
                                   size: 30,
                                   color: HexColor("#628A8A"),
                                 ),
-                                onChanged: (SendModel? newValue) {
+                                onChanged: (Token? newValue) {
                                   setState(() {
                                     dropdownValueOfThird = newValue!;
                                   });
                                 },
-                                items: <SendModel>[
-                                  SendModel(
-                                      symbol: "AOA",
-                                      name: "Aurora",
-                                      imagePath: "assets/aurora-aoa-logo.png"),
-                                  SendModel(
-                                      symbol: "SHIB",
-                                      name: "Shiba Inu",
-                                      imagePath: "assets/shib-logo.png"),
-                                  SendModel(
-                                      symbol: "ETH",
-                                      name: "Ethereum",
-                                      imagePath:
-                                          "assets/ethereum-eth-logo.png"),
-                                  SendModel(
-                                      symbol: "SOL",
-                                      name: "Solana",
-                                      imagePath: "assets/solana-sol-logo.png"),
-                                  SendModel(
-                                      symbol: "USDT",
-                                      name: "Tether",
-                                      imagePath: "assets/tether-usdt-logo.png"),
-                                  SendModel(
-                                      symbol: "UNI",
-                                      name: "Uniswap",
-                                      imagePath: "assets/uniswap-uni-logo.png"),
-                                  SendModel(
-                                      symbol: "Matic",
-                                      name: "Polygon",
-                                      imagePath:
-                                          "assets/polygon-matic-logo.png"),
-                                ].map<DropdownMenuItem<SendModel>>(
-                                    (SendModel value) {
-                                  return DropdownMenuItem<SendModel>(
+                                items: tokenList.map<DropdownMenuItem<Token>>(
+                                    (Token value) {
+                                  return DropdownMenuItem<Token>(
                                     value: value,
                                     child: Row(
                                       children: [
@@ -592,26 +512,18 @@ class _SendState extends State<Send> {
                           height: displayHeight * 0.1,
                           width: displayWidth * 0.7,
                           child: ElevatedButton(
-                            onPressed: () {
-                              Fluttertoast.showToast(
-                                msg:
-                                    "Transfered ${amountController.text} ${dropdownValueOfThird.symbol} to ${addressController.text}",
-                                toastLength: Toast.LENGTH_SHORT,
-                                timeInSecForIosWeb: 1,
-                                backgroundColor: Colors.black,
-                                textColor: Colors.white,
-                                fontSize: 16.0,
+                            onPressed: () async {
+                              await contractModel.sendToken(
+                                dropdownValueOfSecond.contractName,
+                                dropdownValueOfSecond.address,
+                                dropdownValueOfThird.address,
+                                addressController.text,
+                                int.parse(amountController.text),
                               );
                               setState(() {
-                                dropdownValueOfSecond = SendModel(
-                                    symbol: "ETH",
-                                    name: "Ethereum",
-                                    imagePath: "assets/ethereum-eth-logo.png");
+                                dropdownValueOfSecond = tokenList[2];
                               });
-                              dropdownValueOfThird = SendModel(
-                                  symbol: "ETH",
-                                  name: "Ethereum",
-                                  imagePath: "assets/ethereum-eth-logo.png");
+                              dropdownValueOfThird = tokenList[2];
                               addressController.clear();
                               amountController.clear();
                             },

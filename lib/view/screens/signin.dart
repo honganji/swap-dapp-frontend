@@ -3,13 +3,24 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart';
+import 'package:payment_dapp/model/contract_model.dart';
 import 'package:payment_dapp/view/screens/home.dart';
 import 'package:payment_dapp/view/widgets/navbar.dart';
-import 'package:payment_dapp/view_model/users_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:web3_connect/web3_connect.dart';
+import 'package:web3dart/web3dart.dart';
+import 'package:web_socket_channel/io.dart';
 
 class SignIn extends StatelessWidget {
-  const SignIn({Key? key}) : super(key: key);
+  SignIn({Key? key}) : super(key: key);
+  final connection = Web3Connect();
+  final String _rpcUrl = "https://testnet.aurora.dev";
+  final _client =
+      Web3Client("https://testnet.aurora.dev", Client(), socketConnector: () {
+    return IOWebSocketChannel.connect("wss://testnet.aurora.dev")
+        .cast<String>();
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -81,9 +92,17 @@ class SignIn extends StatelessWidget {
                 height: displayHeight * 0.1,
                 width: displayWidth * 0.7,
                 child: ElevatedButton(
-                  onPressed: () {
-                    provider.currentIndex = 0;
-                    Navigator.pushReplacementNamed(context, '/home');
+                  onPressed: () async {
+                    connection.enterChainId(1313161555);
+                    connection.enterRpcUrl(_rpcUrl);
+                    await connection.connect();
+                    if (connection.account != "") {
+                      await context
+                          .read<ContractModel>()
+                          .setConnection(connection);
+                      provider.currentIndex = 0;
+                      Navigator.pushReplacementNamed(context, '/home');
+                    }
                   },
                   child: Text(
                     'Connect Wallet',
